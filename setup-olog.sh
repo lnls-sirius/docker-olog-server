@@ -1,13 +1,15 @@
 #!/bin/sh
 
+export PATH=${PATH}:${GLASSFISH_HOME}/bin
+
 POSTGRES_DATASOURCE=org.postgresql.ds.PGConnectionPoolDataSource
 MYSQL_DATASOURCE=com.mysql.jdbc.jdbc2.optional.MysqlConnectionPoolDataSource
 
 RESOURCE_TYPE=javax.sql.ConnectionPoolDataSource
 CONNECTION_POOL_NAME=OlogPool
 
+DB_POSTGRES_URL=jdbc:postgresql://192.168.7.3:5432/olog
 DB_MYSQL_URL=jdbc:mysql://192.168.7.4:3306/
-DB_POSTGRES_URL=jdbc:postgresql://192.168.7.3:5432/
 
 DB_USER=lnls_olog_user
 DB_PASSWORD=controle
@@ -21,13 +23,20 @@ REALM_SEARCH_FILTER="\"sAMAccountName=%s\""
 REALM_SEARCH_BIND_DN="\"***REMOVED***\""
 REALM_SEARCH_BIND_PASS="\"***REMOVED***\""
 
+echo "AS_ADMIN_PASSWORD=" > /tmp/glassfishpwd
+echo "AS_ADMIN_NEWPASSWORD=${ADMIN_PASSWORD}" >> /tmp/glassfishpwd
+
+asadmin --user=admin --passwordfile=/tmp/glassfishpwd change-admin-password --domain_name domain1
+
 # Start asadmin console and the domain
 asadmin start-domain
 
-# Derby Connection Pool
-asadmin start-database
-
 echo "AS_ADMIN_PASSWORD=${ADMIN_PASSWORD}" > /tmp/glassfishpwd
+
+asadmin --user=admin --passwordfile=/tmp/glassfishpwd --host localhost --port 4848 enable-secure-admin
+
+# Derby Connection Pool
+# asadmin --user=admin --passwordfile=/tmp/glassfishpwd start-database
 
 #### POSTGRES
 # Configures connection pool
@@ -35,7 +44,7 @@ asadmin --user=admin --passwordfile=/tmp/glassfishpwd \
                 create-jdbc-connection-pool \
                 --datasourceclassname ${POSTGRES_DATASOURCE} \
                 --restype ${RESOURCE_TYPE} \
-                --property user=${DB_USER}:password=${DB_PASSWORD}:url=\"${DB_POSTGRES_URL}\":databaseName=${DB_NAME} \
+                --property User=${DB_USER}:Password=${DB_PASSWORD}:Url=\"${DB_POSTGRES_URL}\":DatabaseName=${DB_NAME} \
                 ${CONNECTION_POOL_NAME}
 
 # Configures connection resource
