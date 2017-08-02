@@ -5,27 +5,42 @@
 # Controls Group - Brazilian Synchrotron Light Source Laboratory - LNLS
 #
 
-FROM openjdk:6-jdk
+FROM openjdk:8-jdk
 
 MAINTAINER Gustavo Ciotto
 
 ENV GLASSFISH_CONF_FOLDER /opt/glassfish
-ENV GLASSFISH_HOME /glassfish3
-ENV GLASSFISH_VERSION glassfish-3.1.2.2
+ENV GLASSFISH_HOME /glassfish4
+ENV GLASSFISH_VERSION 4.1.1
 ENV PATH=$PATH:${GLASSFISH_HOME}/bin
 
 RUN mkdir -p ${GLASSFISH_HOME}
 
-RUN wget -P ${GLASSFISH_CONF_FOLDER} http://download.oracle.com/glassfish/3.1.2.2/release/${GLASSFISH_VERSION}.zip
-RUN unzip ${GLASSFISH_CONF_FOLDER}/${GLASSFISH_VERSION}.zip -d /
-RUN rm ${GLASSFISH_CONF_FOLDER}/${GLASSFISH_VERSION}.zip
+RUN wget -P ${GLASSFISH_CONF_FOLDER} http://download.oracle.com/glassfish/${GLASSFISH_VERSION}/release/glassfish-${GLASSFISH_VERSION}.zip
+RUN unzip ${GLASSFISH_CONF_FOLDER}/glassfish-${GLASSFISH_VERSION}.zip -d /
+RUN rm ${GLASSFISH_CONF_FOLDER}/glassfish-${GLASSFISH_VERSION}.zip
+
 
 # Sets postgresql connector jar
-ENV POSTGRES_CONNECTOR postgresql-42.1.3.jre6
+ENV POSTGRES_CONNECTOR postgresql-42.1.4
 RUN mkdir -p ${GLASSFISH_HOME}/glassfish/lib
 RUN wget -P ${GLASSFISH_HOME}/glassfish/lib https://jdbc.postgresql.org/download/${POSTGRES_CONNECTOR}.jar
 
-COPY setup-olog.sh ${GLASSFISH_CONF_FOLDER}/setup-olog.sh
+# Sets mysql connector jar
+ENV MYSQL_CONNECTOR mysql-connector-java-5.1.41
+RUN wget -P ${GLASSFISH_CONF_FOLDER} https://dev.mysql.com/get/Downloads/Connector-J/${MYSQL_CONNECTOR}.tar.gz
+RUN tar -C ${GLASSFISH_CONF_FOLDER} -xvf ${GLASSFISH_CONF_FOLDER}/${MYSQL_CONNECTOR}.tar.gz
+RUN rm ${GLASSFISH_CONF_FOLDER}/${MYSQL_CONNECTOR}.tar.gz
+RUN mv ${GLASSFISH_CONF_FOLDER}/${MYSQL_CONNECTOR}/${MYSQL_CONNECTOR}-bin.jar ${GLASSFISH_HOME}/glassfish/lib
+RUN rm -R ${GLASSFISH_CONF_FOLDER}/${MYSQL_CONNECTOR}
+
+# RUN apt-get update && apt-get install nano
+
+# Clones olog web client
+RUN git clone https://github.com/Olog/logbook.git ${GLASSFISH_CONF_FOLDER}/logbook
+
+COPY setup-olog.sh server.policy ${GLASSFISH_CONF_FOLDER}/
+
 COPY olog-service-2.2.9.war ${GLASSFISH_CONF_FOLDER}/olog-service-2.2.9.war
 
 CMD ["sh", "-c", "${GLASSFISH_CONF_FOLDER}/setup-olog.sh"]
