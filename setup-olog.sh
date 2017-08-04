@@ -120,6 +120,11 @@ asadmin --user=admin --passwordfile=/tmp/glassfishpwd \
 # Copies web client
 cp -r ${GLASSFISH_CONF_FOLDER}/logbook/Olog/public_html/* ${GLASSFISH_HOME}/glassfish/domains/domain1/applications/olog-service-2.2.9
 
+# Changes web manager settings
+sed -i "s/allowDeletingLogs = false/allowDeletingLogs = true/" ${GLASSFISH_HOME}/glassfish/domains/domain1/applications/olog-service-2.2.9/static/js/configuration.js
+sed -i "s/logId = \$log.attr('id');/logId = xml.log[0].id;/" ${GLASSFISH_HOME}/glassfish/domains/domain1/applications/olog-service-2.2.9/static/js/rest.js
+
+
 asadmin --user=admin --passwordfile=/tmp/glassfishpwd \
                 stop-domain
 
