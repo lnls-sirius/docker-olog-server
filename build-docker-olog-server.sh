@@ -9,4 +9,4 @@
 
 . ./env-vars.sh
 
-docker build -t ${DOCKER_MANTAINER_NAME}/${DOCKER_NAME} .
+docker build -t ${DOCKER_MANTAINER_NAME}/${DOCKER_NAME}:${DOCKER_TAG} .

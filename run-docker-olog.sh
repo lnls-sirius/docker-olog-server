@@ -25,6 +25,6 @@ if [ ! -z ${CONTAINERS:+x} ]; then
     docker rm ${DOCKER_RUN_NAME}
 fi
 
-docker run -d --name=${DOCKER_RUN_NAME} -e ADMIN_PASSWORD=controle -p 4848:4848 ${DOCKER_MANTAINER_NAME}/${DOCKER_NAME}
+docker run -d --name=${DOCKER_RUN_NAME} -e ADMIN_PASSWORD=controle -p 4848:4848 ${DOCKER_MANTAINER_NAME}/${DOCKER_NAME}:${DOCKER_TAG}
 
 docker logs -f ${DOCKER_RUN_NAME}
