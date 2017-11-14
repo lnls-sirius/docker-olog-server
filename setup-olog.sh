@@ -8,8 +8,10 @@ MYSQL_DATASOURCE=com.mysql.jdbc.jdbc2.optional.MysqlConnectionPoolDataSource
 RESOURCE_TYPE=javax.sql.ConnectionPoolDataSource
 CONNECTION_POOL_NAME=OlogPool
 
-DB_POSTGRES_URL=jdbc:postgresql://192.168.7.3:5432/olog
-DB_MYSQL_URL=192.168.7.3
+
+DB_URL=olog-mysql-db
+DB_POSTGRES_URL=jdbc:postgresql://${DB_URL}:5432/olog
+DB_MYSQL_URL=${DB_URL}
 
 DB_USER=lnls_olog_user
 DB_PASSWORD=controle
@@ -75,6 +77,11 @@ asadmin --user=admin --passwordfile=/tmp/glassfishpwd start-database
 
 #### MYSQL
 # Configures connection pool
+
+# Waits for the database to be ready
+chmod +x /opt/wait-for-it/wait-for-it.sh
+/opt/wait-for-it/wait-for-it.sh ${DB_MYSQL_URL}:3306
+
 asadmin --user=admin --passwordfile=/tmp/glassfishpwd \
                create-jdbc-connection-pool \
                --datasourceclassname ${MYSQL_DATASOURCE} \

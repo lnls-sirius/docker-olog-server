@@ -39,8 +39,13 @@ RUN rm -R ${GLASSFISH_CONF_FOLDER}/${MYSQL_CONNECTOR}
 # Clones olog web client
 RUN git clone https://github.com/Olog/logbook.git ${GLASSFISH_CONF_FOLDER}/logbook
 
-COPY setup-olog.sh server.policy ${GLASSFISH_CONF_FOLDER}/
+COPY setup-olog.sh ${GLASSFISH_CONF_FOLDER}/
 
 COPY olog-service-2.2.9.war ${GLASSFISH_CONF_FOLDER}/olog-service-2.2.9.war
+
+# Retrieves wait-for-it.sh script
+
+RUN mkdir -p /opt/wait-for-it
+RUN git clone https://github.com/vishnubob/wait-for-it.git /opt/wait-for-it
 
 CMD ["sh", "-c", "${GLASSFISH_CONF_FOLDER}/setup-olog.sh"]
