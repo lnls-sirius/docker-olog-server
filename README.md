@@ -5,7 +5,7 @@ Docker image which wraps an Olog system instance.
 ## Building
 
 1) Edit `env-vars.sh` parameters accordingly.
-2) Execute `build-docker-olog-server.sh` to build the image.
+2) Execute `build-docker-olog-server.sh` to build the image. Before doing that, change `setup-olog.sh` to reflect your LDAP settings.
 
 ## Running
 
