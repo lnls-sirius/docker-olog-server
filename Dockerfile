@@ -44,8 +44,8 @@ RUN git clone https://github.com/Olog/logbook.git ${GLASSFISH_CONF_FOLDER}/logbo
 RUN mkdir -p /opt/wait-for-it
 RUN git clone https://github.com/vishnubob/wait-for-it.git /opt/wait-for-it
 
-COPY olog-service-2.2.9.war ${GLASSFISH_CONF_FOLDER}/olog-service-2.2.9.war
+COPY bin/olog-service-2.2.9.war ${GLASSFISH_CONF_FOLDER}/olog-service-2.2.9.war
 
-COPY setup-olog.sh ${GLASSFISH_CONF_FOLDER}/
+COPY setup-olog.sh index.html ${GLASSFISH_CONF_FOLDER}/
 
 CMD ["sh", "-c", "${GLASSFISH_CONF_FOLDER}/setup-olog.sh"]
