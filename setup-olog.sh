@@ -148,6 +148,8 @@ asadmin --user=admin --passwordfile=/tmp/glassfishpwd stop-domain
 
 sed -i "s:s1as:olog:g" ${GLASSFISH_HOME}/glassfish/domains/domain1/config/domain.xml
 
+cp ${GLASSFISH_CONF_FOLDER}/index.html ${GLASSFISH_HOME}/glassfish/domains/domain1/docroot/
+
 asadmin --user=admin --passwordfile=/tmp/glassfishpwd start-domain -v
 
 rm -f /tmp/glassfishpwd
