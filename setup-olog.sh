@@ -55,6 +55,9 @@ asadmin --user=admin --passwordfile=/tmp/glassfishpwd  start-domain
 
 asadmin --user=admin --passwordfile=/tmp/glassfishpwd --host localhost --port 4848 enable-secure-admin
 
+# Add JVM options to follow the container's CPU and RAM limits
+asadmin --user=admin --passwordfile=/tmp/glassfishpwd create-jvm-options "-XX\:+UnlockExperimentalVMOptions:-XX\:+UseCGroupMemoryLimitForHeap:-Djavax.net.ssl.trustStore=${GLASSFISH_HOME}/glassfish/domains/domain1/config/keystore.jks:-Djavax.net.ssl.keyStore=${GLASSFISH_HOME}/glassfish/domains/domain1/config/keystore.jks"
+
 asadmin --user=admin --passwordfile=/tmp/glassfishpwd restart-domain
 
 # Grant derby socket permissions and starts derby connection pool
@@ -137,7 +140,7 @@ sed -i 's#datePickerDateFormat = .*#datePickerDateFormat = "dd/mm/yy";#' ${GLASS
 
 # Generates SSL certificate for secure connection
 # Get local ip address
-IP_ADDRESS=$(ip addr show eth0 | grep "inet\b" | awk '{print $2}' | cut -d/ -f1)
+IP_ADDRESS=$(hostname)
 
 # Generates keystore
 keytool -genkey -alias olog -keyalg RSA -dname "CN=${IP_ADDRESS}, OU=Controls Group, O=LNLS, L=Campinas, ST=Sao Paulo, C=BR" -storepass ${CERTIFICATE_PASSWORD} -keypass ${CERTIFICATE_PASSWORD} -keystore ${GLASSFISH_CONF_FOLDER}/olog.keystore
