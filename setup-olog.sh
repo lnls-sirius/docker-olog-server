@@ -8,36 +8,39 @@ MYSQL_DATASOURCE=com.mysql.jdbc.jdbc2.optional.MysqlConnectionPoolDataSource
 RESOURCE_TYPE=javax.sql.ConnectionPoolDataSource
 CONNECTION_POOL_NAME=OlogPool
 
-DB_URL=olog-mysql-db
+# Database's environment variables
+DB_URL=${DB_URL:-olog-mysql-db}
+
 DB_POSTGRES_URL=jdbc:postgresql://${DB_URL}:5432/olog
 DB_MYSQL_URL=${DB_URL}
 
-DB_USER=lnls_olog_user
-DB_PASSWORD=controle
-DB_NAME=olog
+DB_USER=${DB_USER:-lnls_olog_user}
+DB_PASSWORD=${DB_PASSWORD:-controle}
+DB_NAME=${DB_NAME:-olog}
+
+# LDAP server's environment server
 
 REALM_CLASS_NAME=com.sun.enterprise.security.auth.realm.ldap.LDAPRealm
 REALM_JAAS_CTX=ldapRealm
 
+# Controls group test LDAP server
 # REALM_BASE_DN="\"cn=users,dc=lnls,dc=br\""
 # REALM_GROUP_DN="\"cn=olog-admin,dc=lnls,dc=br\""
 # REALM_URL="\"ldap://10.0.4.57:389\""
 # REALM_SEARCH_FILTER="\"uid=%s\""
 # REALM_GROUP_FILTER="\"memberuid=%s\""
 
-REALM_BASE_DN="\"OU=Users,OU=LNLS,DC=abtlus,DC=org,DC=br\""
-REALM_URL="\"ldap://ad1.abtlus.org.br:389\""
-REALM_SEARCH_FILTER="\"sAMAccountName=%s\""
-REALM_SEARCH_BIND_DN="\"${BIND_DN}\""
-REALM_SEARCH_BIND_PASS="\"${BIND_PASS}\""
+# CNPEM
+# REALM_BASE_DN="\"OU=Users,OU=LNLS,DC=abtlus,DC=org,DC=br\""
+# REALM_URL="\"ldap://ad1.abtlus.org.br:389\""
+# REALM_SEARCH_FILTER="\"sAMAccountName=%s\""
+# REALM_SEARCH_BIND_DN="\"${BIND_DN}\""
+# REALM_SEARCH_BIND_PASS="\"${BIND_PASS}\""
 
 JNDI_RESOURCE_TYPE="javax.naming.directory.Directory"
 JNDI_FACTORY_CLASS="com.sun.jndi.ldap.LdapCtxFactory"
 JNDI_URL="\"ldap://10.0.4.57:389/cn=users,dc=lnls,dc=br\""
 JNDI_PRINCIPAL="\"cn=olog-admin,dc=lnls,dc=br\""
-
-DERBY_CLASSPATH="/glassfish3/javadb/lib/derby.jar:/glassfish3/javadb/lib/derbynet.jar:/glassfish3/javadb/lib/derbytools.jar:/glassfish3/javadb/lib/derbyclient.jar"
-DERBY_POLICIES=${GLASSFISH_CONF_FOLDER}/server.policy
 
 echo "AS_ADMIN_PASSWORD=" > /tmp/glassfishpwd
 echo "AS_ADMIN_NEWPASSWORD=${ADMIN_PASSWORD}" >> /tmp/glassfishpwd
@@ -61,7 +64,6 @@ asadmin --user=admin --passwordfile=/tmp/glassfishpwd create-jvm-options "-XX\:+
 asadmin --user=admin --passwordfile=/tmp/glassfishpwd restart-domain
 
 # Grant derby socket permissions and starts derby connection pool
-#java -Djava.security.manager -Djava.security.policy=${DERBY_POLICIES} -classpath ${DERBY_CLASSPATH} org.apache.derby.drda.NetworkServerControl start &
 asadmin --user=admin --passwordfile=/tmp/glassfishpwd start-database
 
 #### POSTGRES
@@ -101,17 +103,40 @@ asadmin --user=admin --passwordfile=/tmp/glassfishpwd \
 
 # Configures security realm
 # Local LDAP
-#asadmin --user=admin --passwordfile=/tmp/glassfishpwd \
+# asadmin --user=admin --passwordfile=/tmp/glassfishpwd \
 #                create-auth-realm \
 #                --classname ${REALM_CLASS_NAME} \
 #                --property jaas-context=${REALM_JAAS_CTX}:base-dn=${REALM_BASE_DN}:directory=${REALM_URL}:search-filter=${REALM_SEARCH_FILTER}:group-base-dn=${REALM_GROUP_DN}:group-search-filter=${REALM_GROUP_FILTER}:assign-groups="olog-admins, olog-logbooks, olog-tags, olog-logs" \
 #                olog
 
-# CNPEM's LDAP
+# LDAP settings 
+
+LDAP_SETTINGS="jaas-context=${REALM_JAAS_CTX}:base-dn=${REALM_BASE_DN}:directory=${REALM_URL}:search-filter=${REALM_SEARCH_FILTER}"
+
+if [ ! -z ${REALM_SEARCH_BIND_DN+x} ]; then
+    LDAP_SETTINGS="${LDAP_SETTINGS}:search-bind-dn=${REALM_SEARCH_BIND_DN}"
+fi
+
+if [ ! -z  ${REALM_SEARCH_BIND_PASS+x} ]; then
+    LDAP_SETTINGS="${LDAP_SETTINGS}:search-bind-password=${REALM_SEARCH_BIND_PASS}"
+fi
+
+if [ ! -z ${REALM_GROUP_DN+x} ]; then
+    LDAP_SETTINGS="${LDAP_SETTINGS}:group-base-dn=${REALM_GROUP_DN}"
+else
+    LDAP_SETTINGS="${LDAP_SETTINGS}:assign-groups=\"olog-admins, olog-logbooks, olog-tags, olog-logs\""
+fi
+
+if [ ! -z ${REALM_GROUP_FILTER+x} ]; then
+    LDAP_SETTINGS="${LDAP_SETTINGS}:group-search-filter=${REALM_GROUP_FILTER}"
+fi
+
+set -x
+
 asadmin --user=admin --passwordfile=/tmp/glassfishpwd \
-                create-auth-realm \
+                 create-auth-realm \
                  --classname ${REALM_CLASS_NAME} \
-                 --property jaas-context=${REALM_JAAS_CTX}:base-dn=${REALM_BASE_DN}:directory=${REALM_URL}:search-filter=${REALM_SEARCH_FILTER}:search-bind-dn=${REALM_SEARCH_BIND_DN}:search-bind-password=${REALM_SEARCH_BIND_PASS}:assign-groups="olog-admins, olog-logbooks, olog-tags, olog-logs" \
+                 --property "${LDAP_SETTINGS}" \
                  olog
 
 # Configures JNDI resource
