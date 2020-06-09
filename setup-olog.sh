@@ -2,7 +2,6 @@
 
 export PATH=${PATH}:${GLASSFISH_HOME}/bin
 
-POSTGRES_DATASOURCE=org.postgresql.ds.PGConnectionPoolDataSource
 MYSQL_DATASOURCE=com.mysql.jdbc.jdbc2.optional.MysqlConnectionPoolDataSource
 
 RESOURCE_TYPE=javax.sql.ConnectionPoolDataSource
@@ -11,7 +10,6 @@ CONNECTION_POOL_NAME=OlogPool
 # Database's environment variables
 DB_URL=${DB_URL:-olog-mysql-db}
 
-DB_POSTGRES_URL=jdbc:postgresql://${DB_URL}:5432/olog
 DB_MYSQL_URL=${DB_URL}
 
 DB_USER=${DB_USER:-lnls_olog_user}
@@ -39,7 +37,7 @@ REALM_JAAS_CTX=ldapRealm
 
 JNDI_RESOURCE_TYPE="javax.naming.directory.Directory"
 JNDI_FACTORY_CLASS="com.sun.jndi.ldap.LdapCtxFactory"
-JNDI_URL="\"ldap://10.0.4.57:389/cn=users,dc=lnls,dc=br\""
+JNDI_URL="\"ldap://10.0.38.59:389/cn=users,dc=lnls,dc=br\""
 JNDI_PRINCIPAL="\"cn=olog-admin,dc=lnls,dc=br\""
 
 echo "AS_ADMIN_PASSWORD=" > /tmp/glassfishpwd
@@ -65,21 +63,6 @@ asadmin --user=admin --passwordfile=/tmp/glassfishpwd restart-domain
 
 # Grant derby socket permissions and starts derby connection pool
 asadmin --user=admin --passwordfile=/tmp/glassfishpwd start-database
-
-#### POSTGRES
-# Configures connection pool
-# asadmin --user=admin --passwordfile=/tmp/glassfishpwd \
-#                 create-jdbc-connection-pool \
-#                 --datasourceclassname ${POSTGRES_DATASOURCE} \
-#                 --restype ${RESOURCE_TYPE} \
-#                 --property User=${DB_USER}:Password=${DB_PASSWORD}:Url=\"${DB_POSTGRES_URL}\":DatabaseName=${DB_NAME} \
-#                 ${CONNECTION_POOL_NAME}
-#
-# # Configures connection resource
-# asadmin --user=admin --passwordfile=/tmp/glassfishpwd \
-#                 create-jdbc-resource \
-#                 --connectionpoolid ${CONNECTION_POOL_NAME} \
-#                 jdbc/olog
 
 #### MYSQL
 # Configures connection pool
@@ -155,13 +138,6 @@ asadmin --user=admin --passwordfile=/tmp/glassfishpwd \
 
 # Copies web client
 cp -r ${GLASSFISH_CONF_FOLDER}/logbook/Olog/public_html/* ${GLASSFISH_HOME}/glassfish/domains/domain1/applications/olog-service-2.2.9
-
-# Changes web manager settings
-sed -i "s/allowDeletingLogs = false/allowDeletingLogs = true/" ${GLASSFISH_HOME}/glassfish/domains/domain1/applications/olog-service-2.2.9/static/js/configuration.js
-sed -i "s/logId = \$log.attr('id');/logId = xml.log[0].id;/" ${GLASSFISH_HOME}/glassfish/domains/domain1/applications/olog-service-2.2.9/static/js/rest.js
-sed -i 's#datePickerDateFormatMometParseString = .*#datePickerDateFormatMometParseString = "DD/MM/YYYY hh:mm";#' ${GLASSFISH_HOME}/glassfish/domains/domain1/applications/olog-service-2.2.9/static/js/configuration.js
-sed -i 's#dateFormat = .*#dateFormat = "DD/MM/YY, hh:mm A";#' ${GLASSFISH_HOME}/glassfish/domains/domain1/applications/olog-service-2.2.9/static/js/configuration.js
-sed -i 's#datePickerDateFormat = .*#datePickerDateFormat = "dd/mm/yy";#' ${GLASSFISH_HOME}/glassfish/domains/domain1/applications/olog-service-2.2.9/static/js/configuration.js
 
 # Generates SSL certificate for secure connection
 # Get local ip address
