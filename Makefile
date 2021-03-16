@@ -4,8 +4,8 @@ DOCKER_IMAGE_PREFIX = $(DOCKER_REGISTRY)/$(DOCKER_USER_GROUP)
 
 DATE = $(shell date -I)
 
-OLOG_WEB_HASH=0391ce3f
-OLOG_WEB_REPO=https://gitlab.cnpem.br/con/olog-web-client.git
+OLOG_WEB_HASH=bc375e1
+OLOG_WEB_REPO=https://github.com/lnls-sirius/olog-web-client
 
 DOCKER_TAG = $(OLOG_WEB_HASH)-$(DATE)
 DOCKER_IMAGE = $(DOCKER_IMAGE_PREFIX)/olog-server
