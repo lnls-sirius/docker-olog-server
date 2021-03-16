@@ -25,8 +25,12 @@ RUN mv ${GLASSFISH_CONF_FOLDER}/${MYSQL_CONNECTOR}/${MYSQL_CONNECTOR}-bin.jar ${
 RUN rm -R ${GLASSFISH_CONF_FOLDER}/${MYSQL_CONNECTOR}
 
 # Olog web client 
-
-RUN git clone https://gitlab.cnpem.br/con/olog-web-client.git ${GLASSFISH_CONF_FOLDER}/logbook && cd ${GLASSFISH_CONF_FOLDER}/logbook && git checkout c32463d1
+ARG OLOG_WEB_HASH
+ARG OLOG_WEB_REPO
+RUN set -x; set -e;\
+    git clone ${OLOG_WEB_REPO} ${GLASSFISH_CONF_FOLDER}/logbook &&\
+    cd ${GLASSFISH_CONF_FOLDER}/logbook &&\
+    git checkout ${OLOG_WEB_HASH}
 
 # wait-for-it.sh script
 
