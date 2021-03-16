@@ -22,4 +22,4 @@ build:
 		--tag $(DOCKER_IMAGE):$(DOCKER_TAG) .
 
 push:
-	docker push $(DOCKER_IMAGE):$(DOCKER_TAG) .
+	docker push $(DOCKER_IMAGE):$(DOCKER_TAG)
